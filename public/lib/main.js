@@ -83,9 +83,9 @@
 			if (!text) {
 				return;
 			}
-			require(['notify', 'translator'], function(Notify, translator) {
+			require(['notify', 'translator', 'validator'], function(Notify, translator, validator) {
 				translator.translate(text, function(translated) {
-					var notification = new Notify(config.siteTitle, {
+					var notification = new Notify(validator.unescape(config.siteTitle), {
 						body: translated.replace(/<strong>/g, '').replace(/<\/strong>/g, ''),
 						icon: logo,
 						timeout: 5,
