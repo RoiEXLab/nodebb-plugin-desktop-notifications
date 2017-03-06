@@ -8,7 +8,7 @@
 			return;
 		}
 
-		
+
 		if (localStorage.getItem('plugins:desktop_notifications.ignore') !== 'ignored') {
 			require(['notify'], function(Notify) {
 				if (!Notify.isSupported) {
@@ -74,7 +74,7 @@
 				});
 			}
 		});
-		
+
 		socket.on('event:plugin:desktop_notifications', function(data) {
 			if (!data) {
 				return;
@@ -83,14 +83,19 @@
 			if (!text) {
 				return;
 			}
-			require(['notify', 'translator', 'validator'], function(Notify, translator, validator) {
+			require(['notify', 'translator'], function(Notify, translator) {
+				function decodeEntities(encodedString) {
+					var textArea = document.createElement('textarea');
+					textArea.innerHTML = encodedString;
+					return textArea.value;
+				}
 				translator.translate(text, function(translated) {
-					var notification = new Notify(validator.unescape(config.siteTitle), {
+					var notification = new Notify(decodeEntities(config.siteTitle), {
 						body: translated.replace(/<strong>/g, '').replace(/<\/strong>/g, ''),
 						icon: logo,
 						timeout: 5,
 						notifyClick: function() {
-							socket.emit('notifications.get', {nids: [data.nid]}, function(err, notifs) { 
+							socket.emit('notifications.get', {nids: [data.nid]}, function(err, notifs) {
 								if (notifs.length) {
 									ajaxify.go(notifs[0].path.substring(1));
 								}
@@ -100,7 +105,7 @@
 					});
 					notification.show();
 
-					
+
 					if (data.tid) {
 						$(window).on('action:ajaxify.start', removeNotif);
 						setTimeout(function() {
